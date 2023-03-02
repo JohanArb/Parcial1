@@ -1,0 +1,111 @@
+Configuracion Named.
+Zona:
+/* zona reversa*/
+zone "50.168.192.in-addr.arpa" IN{
+         type master;
+         file "servicios.com.rev";
+};
+/*zona hacia adelante*/
+zone "nuevoservicios.com" IN {
+             type master;
+             file "nuevoservicios.com.fwd";
+};
+/*zona servicios*/
+zone "servicios.com" IN {
+         type master;
+         file "servicios.com.fwd";
+};
+
+/*zona reversa nuevoservicios*/
+zone "1.50.168.192.in-addr.arpa" IN{
+            type master;
+            file "nuevoservicios.com.rev";
+};
+
+Configuracion Zonas servicios.com.fwd:
+$ORIGIN servicios.com.
+$TTL 3H
+@       IN SOA   server.servicios.com. root@servicios.com. (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+@       IN      NS      server.servicios.com.
+
+;host en la zona
+
+server  IN      A       192.168.50.3
+www     IN      CNAME   server
+cliente IN      A       192.168.50.2
+intranet IN     CNAME   cliente
+
+Configuracion Zonas servicios.com.rev:
+$ORIGIN 50.168.192.in-addr.arpa.
+$TTL 3H
+@       IN SOA  server.servicios.com. root@servicios.com. (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+@       IN      NS      server.servicios.com.
+
+;host en la zona
+
+3       IN      PTR     server.servicios.com.
+2       IN      PTR     cliente.servicios.com.
+
+Configuracion zona nuevoservicios.com.fwd:
+$ORIGIN nuevoservicios.com.
+$TTL 3H
+@       IN SOA  server.nuevoservicios.com. root@nuevoservicios.com. (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+@       IN      NS      server.nuevoservicios.com.
+;host
+server IN A 192.168.50.4
+wwww IN CNAME server
+cliente IN A 192.168.50.2
+intranet IN CNAME cliente
+
+Configuracion zona nuevoservicios.com.rev
+$ORIGIN 1.50.168.192.in-addr.arpa.
+$TTL 3H
+@       IN SOA  server.nuevoservicios.com. root@nuevoservicios.com. (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+@       IN      NS      server.nuevoservicios.com.
+
+;host en la zona
+
+4       IN      PTR     server.nuevoservicios.com.
+2       IN      PTR     cliente
+
+Configuracion espesifica del httpd en un .htaccess.
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www.servicios.com$ [NC]
+#RewriteCond %{HTTP_HOST} ^www.servicios.com/~mariamartinez  [NC]
+#RewriteCond %{HTTP_HOST} ^www.servicios.com/~pedroperez  [NC]
+#RewriteCond %{HTTP_HOST} ^www.servicios.com/~juangonzales  [NC]
+RewriteRule ^(.*)$ http://www.nuevoservicios.com/$1 [L,R=301,NC]
+
+
+
+Servidor 2.
+
+[root@servidor2 html]# cd /etc/
+[root@servidor2 etc]# cd httpd/conf
+[root@servidor2 conf]# vim httpd.conf
+[root@servidor2 conf]# cd /var/www/html
+[root@servidor2 html]# vim main.html
+
+
+
+
